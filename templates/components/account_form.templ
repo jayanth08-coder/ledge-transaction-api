@@ -1,0 +1,38 @@
+package components
+
+templ AccountForm() {
+	<div class="card shadow-sm mb-4">
+		<div class="card-header bg-white">
+			<h2 class="h5 mb-0">Create account</h2>
+		</div>
+		<div class="card-body">
+			<div id="account-alert"></div>
+			<form
+				hx-post="/api/accounts"
+				hx-target="#account-alert"
+				hx-swap="innerHTML"
+				hx-disabled-elt="find button[type=submit]"
+				hx-indicator="#account-spinner"
+			>
+				<div class="mb-3">
+					<label for="account-name" class="form-label">Account holder name</label>
+					<input
+						type="text"
+						class="form-control"
+						id="account-name"
+						name="name"
+						required
+						maxlength="255"
+						autocomplete="name"
+						placeholder="e.g. Priya Sharma"
+					/>
+					<div class="form-text">Balance always starts at ₹0. Account ID and timestamps are server-generated.</div>
+				</div>
+				<button type="submit" class="btn btn-primary">
+					<span id="account-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+					Create account
+				</button>
+			</form>
+		</div>
+	</div>
+}

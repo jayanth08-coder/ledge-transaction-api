@@ -1,0 +1,65 @@
+package components
+
+import "fmt"
+import "github.com/ledge/ledge-transaction-api/internal/domain"
+
+// Pagination controls call the REST API (/api/...) so page/limit are handled in the backend.
+templ Pagination(accountID string, meta domain.PaginationMeta, filterType string) {
+	<nav aria-label="Transaction pagination" class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+		<div class="text-muted small font-monospace" id="pagination-meta">
+			<span>current_page: { fmt.Sprintf("%d", meta.CurrentPage) }</span>
+			<span class="mx-1">·</span>
+			<span>page_size: { fmt.Sprintf("%d", meta.PageSize) }</span>
+			<span class="mx-1">·</span>
+			<span>total_records: { fmt.Sprintf("%d", meta.TotalRecords) }</span>
+			<span class="mx-1">·</span>
+			<span>total_pages: { fmt.Sprintf("%d", meta.TotalPages) }</span>
+		</div>
+		<div class="btn-group">
+			if meta.CurrentPage > 1 {
+				<button
+					type="button"
+					class="btn btn-outline-secondary btn-sm"
+					hx-get={ apiTxnURL(accountID, meta.CurrentPage-1, meta.PageSize, filterType) }
+					hx-target="#txn-panel"
+					hx-swap="none"
+					hx-headers='{"Accept":"application/json"}'
+				>Previous</button>
+			} else {
+				<button type="button" class="btn btn-outline-secondary btn-sm" disabled>Previous</button>
+			}
+			if meta.TotalPages > 0 && meta.CurrentPage < meta.TotalPages {
+				<button
+					type="button"
+					class="btn btn-outline-secondary btn-sm"
+					hx-get={ apiTxnURL(accountID, meta.CurrentPage+1, meta.PageSize, filterType) }
+					hx-target="#txn-panel"
+					hx-swap="none"
+					hx-headers='{"Accept":"application/json"}'
+				>Next</button>
+			} else {
+				<button type="button" class="btn btn-outline-secondary btn-sm" disabled>Next</button>
+			}
+		</div>
+	</nav>
+}
+
+func apiTxnURL(accountID string, page, limit int, filterType string) string {
+	url := fmt.Sprintf("/api/accounts/%s/transactions?page=%d&limit=%d", accountID, page, limit)
+	if filterType != "" {
+		url += "&type=" + filterType
+	}
+	return url
+}
+
+// txnURL kept for HTML fragment refresh (same query params as the API).
+func txnURL(accountID string, page, limit int, filterType string) string {
+	return apiTxnURL(accountID, page, limit, filterType)
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}

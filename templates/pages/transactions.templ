@@ -1,0 +1,23 @@
+package pages
+
+import "github.com/ledge/ledge-transaction-api/internal/domain"
+import "github.com/ledge/ledge-transaction-api/templates/layouts"
+import "github.com/ledge/ledge-transaction-api/templates/components"
+
+templ AccountDetailPage(account domain.Account, result domain.PaginatedTransactions, filterType string) {
+	@layouts.Base(account.Name) {
+		<nav aria-label="breadcrumb" class="mb-3">
+			<ol class="breadcrumb">
+				<li class="breadcrumb-item"><a href="/accounts">Accounts</a></li>
+				<li class="breadcrumb-item active" aria-current="page">{ account.Name }</li>
+			</ol>
+		</nav>
+		<div class="mb-4">
+			<h1 class="h3 mb-1">{ account.Name }</h1>
+			<p class="text-muted mb-0 font-monospace small"><span class="fw-semibold">Account ID:</span> { account.ID }</p>
+		</div>
+		@components.TransactionForm(account.ID)
+		@components.TransferForm(account.ID)
+		@components.TransactionPanel(account, result, filterType)
+	}
+}

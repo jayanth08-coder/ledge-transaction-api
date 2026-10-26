@@ -1,0 +1,59 @@
+package pages
+
+import "github.com/ledge/ledge-transaction-api/internal/domain"
+import "github.com/ledge/ledge-transaction-api/templates/layouts"
+import "github.com/ledge/ledge-transaction-api/templates/components"
+
+templ AccountsPage(accounts []domain.AccountResponse) {
+	@layouts.Base("Accounts") {
+		<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+			<div>
+				<h1 class="h3 mb-1">Accounts</h1>
+				<p class="text-muted mb-0">Create and manage ledger accounts</p>
+			</div>
+		</div>
+		@components.AccountForm()
+		<div class="card shadow-sm" id="accounts-list">
+			<div class="card-header bg-white">
+				<h2 class="h5 mb-0">All accounts</h2>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table mb-0 align-middle">
+						<thead class="table-light">
+							<tr>
+								<th>Name</th>
+								<th>Balance</th>
+								<th>Created (UTC)</th>
+								<th>Account ID</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							if len(accounts) == 0 {
+								<tr><td colspan="5" class="text-center text-muted py-4">No accounts yet.</td></tr>
+							} else {
+								for _, a := range accounts {
+									<tr>
+										<td>{ a.Name }</td>
+										<td class="font-monospace">{ components.FormatMoneyExport(a.Balance) }</td>
+										<td class="text-nowrap">{ a.CreatedAt.UTC().Format("2006-01-02 15:04:05") }</td>
+										<td class="font-monospace small text-muted">{ a.ID }</td>
+										<td class="text-end">
+											<a class="btn btn-sm btn-outline-primary" href={ accountPath(a.ID) }>Details</a>
+										</td>
+									</tr>
+								}
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+		<script>
+			document.body.addEventListener('accountCreated', function () {
+				window.location.reload();
+			});
+		</script>
+	}
+}

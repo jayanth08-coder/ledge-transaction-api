@@ -1,0 +1,92 @@
+package components
+
+templ TransactionForm(accountID string) {
+	<div class="card shadow-sm mb-4">
+		<div class="card-header bg-white">
+			<h2 class="h5 mb-0">Add transaction</h2>
+		</div>
+		<div class="card-body">
+			<div id="txn-alert"></div>
+			<form
+				hx-post="/api/transactions"
+				hx-target="#txn-alert"
+				hx-swap="innerHTML"
+				hx-disabled-elt="find button[type=submit]"
+				hx-indicator="#txn-spinner"
+				hx-on::after-request="if(event.detail.successful){ document.body.dispatchEvent(new Event('refresh-txns')); this.reset(); }"
+			>
+				<input type="hidden" name="account_id" value={ accountID }/>
+				<div class="row g-3">
+					<div class="col-md-4">
+						<label for="txn-type" class="form-label">Type</label>
+						<select class="form-select" id="txn-type" name="type" required>
+							<option value="credit">Credit</option>
+							<option value="debit">Debit</option>
+						</select>
+					</div>
+					<div class="col-md-4">
+						<label for="txn-amount" class="form-label">Amount (₹)</label>
+						<input type="number" class="form-control" id="txn-amount" name="amount" min="1" step="1" required/>
+					</div>
+					<div class="col-md-4">
+						<label for="txn-ref" class="form-label">Reference ID</label>
+						<input type="text" class="form-control" id="txn-ref" name="reference_id" maxlength="128"/>
+						<div class="form-text">Optional — left blank, the server generates one (shown in history). Supply your own to test duplicate HTTP 409.</div>
+					</div>
+					<div class="col-12">
+						<label for="txn-desc" class="form-label">Description</label>
+						<input type="text" class="form-control" id="txn-desc" name="description" maxlength="500" placeholder="Optional description"/>
+					</div>
+				</div>
+				<button type="submit" class="btn btn-primary mt-3">
+					<span id="txn-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+					Submit transaction
+				</button>
+			</form>
+		</div>
+	</div>
+}
+
+templ TransferForm(accountID string) {
+	<div class="card shadow-sm mb-4">
+		<div class="card-header bg-white">
+			<h2 class="h5 mb-0">Transfer money</h2>
+		</div>
+		<div class="card-body">
+			<div id="transfer-alert"></div>
+			<form
+				hx-post="/api/transfers"
+				hx-target="#transfer-alert"
+				hx-swap="innerHTML"
+				hx-disabled-elt="find button[type=submit]"
+				hx-indicator="#transfer-spinner"
+				hx-on::after-request="if(event.detail.successful){ document.body.dispatchEvent(new Event('refresh-txns')); this.reset(); }"
+			>
+				<input type="hidden" name="from_account_id" value={ accountID }/>
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label for="to-account" class="form-label">To Account ID</label>
+						<input type="text" class="form-control" id="to-account" name="to_account_id" required/>
+					</div>
+					<div class="col-md-3">
+						<label for="xfer-amount" class="form-label">Amount (₹)</label>
+						<input type="number" class="form-control" id="xfer-amount" name="amount" min="1" step="1" required/>
+					</div>
+					<div class="col-md-3">
+						<label for="xfer-ref" class="form-label">Reference ID</label>
+						<input type="text" class="form-control" id="xfer-ref" name="reference_id" maxlength="128"/>
+						<div class="form-text">Optional — auto-generated when blank.</div>
+					</div>
+					<div class="col-12">
+						<label for="xfer-desc" class="form-label">Description</label>
+						<input type="text" class="form-control" id="xfer-desc" name="description" maxlength="500"/>
+					</div>
+				</div>
+				<button type="submit" class="btn btn-outline-primary mt-3">
+					<span id="transfer-spinner" class="htmx-indicator spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+					Transfer
+				</button>
+			</form>
+		</div>
+	</div>
+}
