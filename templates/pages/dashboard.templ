@@ -1,0 +1,72 @@
+package pages
+
+import "fmt"
+import "github.com/ledge/ledge-transaction-api/internal/domain"
+import "github.com/ledge/ledge-transaction-api/templates/layouts"
+import "github.com/ledge/ledge-transaction-api/templates/components"
+
+templ DashboardPage(accountCount int64, txnCount int64, recent []domain.AccountResponse) {
+	@layouts.Base("Dashboard") {
+		<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+			<div>
+				<h1 class="h3 mb-1">Dashboard</h1>
+				<p class="text-muted mb-0">Overview of your transaction ledger</p>
+			</div>
+			<a href="/accounts" class="btn btn-primary">Manage accounts</a>
+		</div>
+		<div class="row g-3 mb-4">
+			<div class="col-md-6">
+				<div class="card shadow-sm h-100">
+					<div class="card-body">
+						<div class="text-muted small">Accounts</div>
+						<div class="display-6 fw-semibold">{ fmt.Sprintf("%d", accountCount) }</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="card shadow-sm h-100">
+					<div class="card-body">
+						<div class="text-muted small">Transactions</div>
+						<div class="display-6 fw-semibold">{ fmt.Sprintf("%d", txnCount) }</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card shadow-sm">
+			<div class="card-header bg-white d-flex justify-content-between align-items-center">
+				<h2 class="h5 mb-0">Recent accounts</h2>
+				<a href="/accounts" class="small">View all</a>
+			</div>
+			<div class="card-body p-0">
+				<div class="table-responsive">
+					<table class="table mb-0 align-middle">
+						<thead class="table-light">
+							<tr>
+								<th>Name</th>
+								<th>Balance</th>
+								<th>Created</th>
+								<th>Account ID</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							if len(recent) == 0 {
+								<tr><td colspan="5" class="text-center text-muted py-4">No accounts yet. Create one to get started.</td></tr>
+							} else {
+								for _, a := range recent {
+									<tr>
+										<td>{ a.Name }</td>
+										<td class="font-monospace">{ components.FormatMoneyExport(a.Balance) }</td>
+										<td class="text-nowrap">{ a.CreatedAt.UTC().Format("2006-01-02 15:04") }</td>
+										<td class="font-monospace small text-muted">{ a.ID }</td>
+										<td class="text-end"><a class="btn btn-sm btn-outline-primary" href={ accountPath(a.ID) }>Open</a></td>
+									</tr>
+								}
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	}
+}

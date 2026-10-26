@@ -1,0 +1,123 @@
+package components
+
+import "fmt"
+import "github.com/ledge/ledge-transaction-api/internal/domain"
+
+templ TransactionTable(txns []domain.TransactionResponse) {
+	<div class="table-responsive" id="txn-table-wrap">
+		<table class="table table-hover align-middle mb-0">
+			<thead class="table-light">
+				<tr>
+					<th scope="col">Created (UTC)</th>
+					<th scope="col">Type</th>
+					<th scope="col">Amount</th>
+					<th scope="col">Reference</th>
+					<th scope="col">Description</th>
+					<th scope="col">Transaction ID</th>
+				</tr>
+			</thead>
+			<tbody id="txn-table-body">
+				if len(txns) == 0 {
+					<tr>
+						<td colspan="6" class="text-center text-muted py-4">No transactions found.</td>
+					</tr>
+				} else {
+					for _, t := range txns {
+						<tr>
+							<td class="text-nowrap">{ t.CreatedAt.UTC().Format("2006-01-02 15:04:05") }</td>
+							<td>
+								if t.Type == "credit" {
+									<span class="badge text-bg-success">credit</span>
+								} else {
+									<span class="badge text-bg-danger">debit</span>
+								}
+							</td>
+							<td class="font-monospace">{ formatMoney(t.Amount) }</td>
+							<td class="font-monospace small">{ t.ReferenceID }</td>
+							<td>{ t.Description }</td>
+							<td class="font-monospace small text-muted">{ shortID(t.ID) }</td>
+						</tr>
+					}
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+templ TransactionFilters(accountID string, currentType string, pageSize int) {
+	<div class="btn-group mb-3" role="group" aria-label="Transaction type filter" id="txn-filters">
+		<button
+			type="button"
+			class={ "btn btn-sm", filterClass(currentType, "") }
+			hx-get={ apiTxnURL(accountID, 1, pageSize, "") }
+			hx-target="#txn-panel"
+			hx-swap="none"
+			hx-headers='{"Accept":"application/json"}'
+		>All</button>
+		<button
+			type="button"
+			class={ "btn btn-sm", filterClass(currentType, "credit") }
+			hx-get={ apiTxnURL(accountID, 1, pageSize, "credit") }
+			hx-target="#txn-panel"
+			hx-swap="none"
+			hx-headers='{"Accept":"application/json"}'
+		>Credits</button>
+		<button
+			type="button"
+			class={ "btn btn-sm", filterClass(currentType, "debit") }
+			hx-get={ apiTxnURL(accountID, 1, pageSize, "debit") }
+			hx-target="#txn-panel"
+			hx-swap="none"
+			hx-headers='{"Accept":"application/json"}'
+		>Debits</button>
+	</div>
+}
+
+templ TransactionPanel(account domain.Account, result domain.PaginatedTransactions, filterType string) {
+	<div
+		id="txn-panel"
+		data-account-id={ account.ID }
+		data-balance={ fmt.Sprintf("%d", account.Balance) }
+		data-filter={ filterType }
+		data-page={ fmt.Sprintf("%d", result.Pagination.CurrentPage) }
+		data-limit={ fmt.Sprintf("%d", result.Pagination.PageSize) }
+		hx-get={ apiTxnURL(account.ID, result.Pagination.CurrentPage, result.Pagination.PageSize, filterType) }
+		hx-trigger="refresh-txns from:body"
+		hx-swap="none"
+		hx-headers='{"Accept":"application/json"}'
+	>
+		<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+			<div>
+				<span class="text-muted">Current balance</span>
+				<div class="fs-4 fw-semibold font-monospace" id="account-balance">{ formatMoney(account.Balance) }</div>
+			</div>
+			@TransactionFilters(account.ID, filterType, result.Pagination.PageSize)
+		</div>
+		<div class="card shadow-sm">
+			<div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+				<h2 class="h5 mb-0">Transaction history</h2>
+				<span class="small text-muted">Sorted latest-first via backend (<code>created_at DESC</code>)</span>
+			</div>
+			<div class="card-body p-0">
+				@TransactionTable(result.Data)
+			</div>
+			<div class="card-footer bg-white" id="txn-pagination">
+				@Pagination(account.ID, result.Pagination, filterType)
+			</div>
+		</div>
+	</div>
+}
+
+func filterClass(current, target string) string {
+	if current == target {
+		return "btn-primary"
+	}
+	return "btn-outline-primary"
+}
+
+func shortID(id string) string {
+	if len(id) <= 8 {
+		return id
+	}
+	return id[:8] + "…"
+}

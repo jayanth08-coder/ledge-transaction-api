@@ -1,0 +1,142 @@
+:root {
+  --slate: #1e293b;
+  --accent: #0f766e;
+}
+
+.bg-slate {
+  background-color: var(--slate) !important;
+}
+
+.navbar-brand {
+  letter-spacing: 0.02em;
+}
+
+.htmx-indicator {
+  display: none;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+  display: inline-block;
+}
+
+.card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.font-monospace {
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #0d9488;
+  border-color: #0d9488;
+}
+
+.display-6 {
+  font-size: 2rem;
+}
+
+.status-indication {
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+/* API JSON panel — fully visible above the taskbar when open */
+.json-status-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(440px, calc(100vw - 2rem));
+  height: min(360px, calc(100vh - 5rem));
+  background: #0f172a;
+  color: #e2e8f0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.45);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.json-status-panel.is-collapsed {
+  display: none !important;
+}
+
+.json-status-header {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  background: #1e293b;
+}
+
+.json-status-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem;
+  font-size: 0.78rem;
+  background: #0b1220;
+}
+
+.json-log-entry {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.35rem;
+  padding: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.json-log-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #cbd5e1;
+  margin-top: 0.35rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.json-panel-fab {
+  display: none;
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2000;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.4);
+  cursor: pointer;
+}
+
+.json-panel-fab.is-visible {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+@media (max-width: 576px) {
+  .display-6 {
+    font-size: 1.6rem;
+  }
+
+  .json-status-panel {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: calc(100vw - 1rem);
+    height: min(50vh, 360px);
+  }
+}

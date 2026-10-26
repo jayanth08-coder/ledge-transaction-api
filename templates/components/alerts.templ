@@ -1,0 +1,76 @@
+package components
+
+import "fmt"
+
+templ Alert(kind string, message string) {
+	@StatusAlert(kind, 0, "", message)
+}
+
+templ StatusAlert(kind string, httpStatus int, code string, message string) {
+	if kind == "success" || httpStatus == 201 {
+		<div class="alert alert-success alert-dismissible fade show status-indication" role="alert" id="flash-alert"
+			data-http-status={ fmt.Sprintf("%d", httpStatus) }
+			data-error-code={ code }>
+			<div class="d-flex align-items-start gap-2">
+				<span class="badge text-bg-success fs-6">HTTP { fmt.Sprintf("%d", httpStatusOr(httpStatus, 201)) }</span>
+				<div>
+					<div class="fw-semibold">{ statusLabel(code, "OK") }</div>
+					<div>{ message }</div>
+				</div>
+			</div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	} else if httpStatus == 409 || code == "DUPLICATE_REFERENCE_ID" || code == "DUPLICATE_TRANSFER_REFERENCE" {
+		<div class="alert alert-warning alert-dismissible fade show status-indication border border-warning" role="alert" id="flash-alert"
+			data-http-status={ fmt.Sprintf("%d", httpStatus) }
+			data-error-code={ code }>
+			<div class="d-flex align-items-start gap-2">
+				<span class="badge text-bg-warning text-dark fs-6">HTTP { fmt.Sprintf("%d", httpStatusOr(httpStatus, 409)) }</span>
+				<div>
+					<div class="fw-semibold">{ statusLabel(code, "CONFLICT") }</div>
+					if code == "DUPLICATE_REFERENCE_ID" {
+						<div class="mb-1"><strong>Duplicate reference ID remarked:</strong> this reference is already used on this account.</div>
+					}
+					<div>{ message }</div>
+				</div>
+			</div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	} else if kind == "error" {
+		<div class="alert alert-danger alert-dismissible fade show status-indication" role="alert" id="flash-alert"
+			data-http-status={ fmt.Sprintf("%d", httpStatus) }
+			data-error-code={ code }>
+			<div class="d-flex align-items-start gap-2">
+				if httpStatus > 0 {
+					<span class="badge text-bg-danger fs-6">HTTP { fmt.Sprintf("%d", httpStatus) }</span>
+				}
+				<div>
+					if code != "" {
+						<div class="fw-semibold">{ code }</div>
+					}
+					<div>{ message }</div>
+				</div>
+			</div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	} else {
+		<div class="alert alert-info alert-dismissible fade show" role="alert" id="flash-alert">
+			{ message }
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+		</div>
+	}
+}
+
+func httpStatusOr(status, fallback int) int {
+	if status > 0 {
+		return status
+	}
+	return fallback
+}
+
+func statusLabel(code, fallback string) string {
+	if code != "" {
+		return code
+	}
+	return fallback
+}
