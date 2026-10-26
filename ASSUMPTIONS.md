@@ -14,7 +14,7 @@ This document records explicit assumptions made while implementing the Transacti
 
 **Earlier minor-unit (paise) design was replaced** so the API reads naturally as rupees for evaluators and UI users.
 
----
+----
 
 ## 2. Identifiers & timestamps
 
