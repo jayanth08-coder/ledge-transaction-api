@@ -147,7 +147,7 @@ print_banner() {
   Transaction Ledger API
   UI:   http://${APP_HOST}:${APP_PORT}/
   API:  http://${APP_HOST}:${APP_PORT}/api
-  Docs: docs/API.md  |  docs/ASSUMPTIONS.md
+  Docs: API.md  |  ASSUMPTIONS.md
   DB:   ${DATABASE_PATH}   SEED_DEMO=${SEED_DEMO}
 ============================================================
   Demo accounts (after seed):

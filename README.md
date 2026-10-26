@@ -35,8 +35,8 @@ Skip DB wipe: `RESET_DB=false ./scripts/setup-and-run.sh` (bash) or `$env:RESET_
 
 | Doc | Purpose |
 | --- | --- |
-| [docs/API.md](docs/API.md) | Full API reference (endpoints, schemas, errors, curl) |
-| [docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md) | Assumptions & design decisions for evaluation |
+| [API.md](API.md) | Full API reference (endpoints, schemas, errors, curl) |
+| [ASSUMPTIONS.md](ASSUMPTIONS.md) | Assumptions & design decisions for evaluation |
 
 ## Assessment objective
 
