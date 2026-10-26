@@ -13,15 +13,23 @@ chmod +x scripts/setup-and-run.sh
 ./scripts/setup-and-run.sh
 ```
 
-**Windows PowerShell**
+**Windows (recommended ? avoids ExecutionPolicy blocks)**
+
+Double-click or run from Command Prompt / PowerShell:
+
+```bat
+scripts\setup-and-run.cmd
+```
+
+Or from PowerShell if scripts are blocked as ?not digitally signed?:
 
 ```powershell
-./scripts/setup-and-run.ps1
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-and-run.ps1
 ```
 
 The script installs Go/templ if missing (where supported), clears `data/*.db*`, seeds demo data (`SEED_DEMO=true`), and starts the server.
 
-Skip DB wipe: `RESET_DB=false ./scripts/setup-and-run.sh`
+Skip DB wipe: `RESET_DB=false ./scripts/setup-and-run.sh` (bash) or `$env:RESET_DB="false"; .\scripts\setup-and-run.cmd` (Windows).
 
 ## Documentation
 
@@ -96,6 +104,20 @@ ledge-transaction-api/
 - Make (optional; commands below also work without it)
 
 ### Windows PowerShell notes
+
+If `./scripts/setup-and-run.ps1` fails with **not digitally signed** / `PSSecurityException`, do **not** change machine policy permanently. Use either:
+
+```bat
+scripts\setup-and-run.cmd
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-and-run.ps1
+```
+
+Optional (CurrentUser only): `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+
+Refresh PATH after installing Go:
 
 ```powershell
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" +
