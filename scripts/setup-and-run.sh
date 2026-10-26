@@ -12,7 +12,7 @@ SEED_DEMO="${SEED_DEMO:-true}"
 RESET_DB="${RESET_DB:-true}"
 
 log()  { printf '\n==> %s\n' "$*"; }
-ok()   { printf '    ✓ %s\n' "$*"; }
+ok()   { printf '    [OK] %s\n' "$*"; }
 warn() { printf '    ! %s\n' "$*" >&2; }
 
 need_cmd() {

@@ -13,23 +13,23 @@ chmod +x scripts/setup-and-run.sh
 ./scripts/setup-and-run.sh
 ```
 
-**Windows (recommended ? avoids ExecutionPolicy blocks)**
+**Windows (easiest)**
 
-Double-click or run from Command Prompt / PowerShell:
+Double-click `run.cmd` in the project root, or from Command Prompt / PowerShell:
 
 ```bat
-scripts\setup-and-run.cmd
+run.cmd
 ```
 
-Or from PowerShell if scripts are blocked as ?not digitally signed?:
+If PowerShell says the script is not digitally signed:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\setup-and-run.ps1
 ```
 
-The script installs Go/templ if missing (where supported), clears `data/*.db*`, seeds demo data (`SEED_DEMO=true`), and starts the server.
+The script installs Go/templ if missing (where supported), clears `data/*.db*`, seeds demo data (`SEED_DEMO=true`), and starts the server. Setup scripts are ASCII-only so they work after ZIP download on any Windows locale.
 
-Skip DB wipe: `RESET_DB=false ./scripts/setup-and-run.sh` (bash) or `$env:RESET_DB="false"; .\scripts\setup-and-run.cmd` (Windows).
+Skip DB wipe: `RESET_DB=false ./scripts/setup-and-run.sh` (bash) or `$env:RESET_DB="false"; .\run.cmd` (Windows).
 
 ## Documentation
 
@@ -108,7 +108,7 @@ ledge-transaction-api/
 If `./scripts/setup-and-run.ps1` fails with **not digitally signed** / `PSSecurityException`, do **not** change machine policy permanently. Use either:
 
 ```bat
-scripts\setup-and-run.cmd
+run.cmd
 ```
 
 ```powershell
