@@ -1,29 +1,45 @@
-# setup-and-run.ps1 — Windows helper: install deps if missing, reset DB, seed, run.
+# setup-and-run.ps1 - Windows helper: install deps if missing, reset DB, seed, run.
+# ASCII-only so Windows PowerShell 5.1 parses this after ZIP download on any locale.
 $ErrorActionPreference = "Stop"
+
 $Root = Split-Path -Parent $PSScriptRoot
-Set-Location $Root
+Set-Location -LiteralPath $Root
 
-$env:APP_HOST = if ($env:APP_HOST) { $env:APP_HOST } else { "127.0.0.1" }
-$env:APP_PORT = if ($env:APP_PORT) { $env:APP_PORT } else { "8080" }
-$env:DATABASE_PATH = if ($env:DATABASE_PATH) { $env:DATABASE_PATH } else { "data/ledger.db" }
-$env:SEED_DEMO = if ($env:SEED_DEMO) { $env:SEED_DEMO } else { "true" }
-$ResetDb = if ($env:RESET_DB) { $env:RESET_DB } else { "true" }
+if (-not $env:APP_HOST) { $env:APP_HOST = "127.0.0.1" }
+if (-not $env:APP_PORT) { $env:APP_PORT = "8080" }
+if (-not $env:DATABASE_PATH) { $env:DATABASE_PATH = "data/ledger.db" }
+if (-not $env:SEED_DEMO) { $env:SEED_DEMO = "true" }
+if (-not $env:RESET_DB) { $env:RESET_DB = "true" }
 
-function Write-Step($msg) { Write-Host "`n==> $msg" -ForegroundColor Cyan }
-function Write-Ok($msg) { Write-Host "    ✓ $msg" -ForegroundColor Green }
+function Write-Step {
+  param([string]$Message)
+  Write-Host ""
+  Write-Host ("==> " + $Message) -ForegroundColor Cyan
+}
 
-# Refresh PATH (Machine + User + Go bin)
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
-            [System.Environment]::GetEnvironmentVariable("Path", "User") + ";" +
-            "$env:USERPROFILE\go\bin"
+function Write-Ok {
+  param([string]$Message)
+  Write-Host ("    [OK] " + $Message) -ForegroundColor Green
+}
+
+function Refresh-Path {
+  $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+  $user = [System.Environment]::GetEnvironmentVariable("Path", "User")
+  $goBin = Join-Path $env:USERPROFILE "go\bin"
+  $parts = @()
+  if ($machine) { $parts += $machine }
+  if ($user) { $parts += $user }
+  $parts += $goBin
+  $env:Path = ($parts -join ";")
+}
+
+Refresh-Path
 
 Write-Step "Checking Go"
 if (-not (Get-Command go -ErrorAction SilentlyContinue)) {
   Write-Host "Go not found. Installing via winget..." -ForegroundColor Yellow
   winget install GoLang.Go --accept-package-agreements --accept-source-agreements
-  $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
-              [System.Environment]::GetEnvironmentVariable("Path", "User") + ";" +
-              "$env:USERPROFILE\go\bin"
+  Refresh-Path
 }
 if (-not (Get-Command go -ErrorAction SilentlyContinue)) {
   throw "Go is still not available. Install from https://go.dev/dl/ and reopen PowerShell."
@@ -33,20 +49,21 @@ Write-Ok (go version)
 Write-Step "Checking templ CLI"
 if (-not (Get-Command templ -ErrorAction SilentlyContinue)) {
   go install github.com/a-h/templ/cmd/templ@v0.3.906
-  $env:Path = "$env:USERPROFILE\go\bin;" + $env:Path
+  Refresh-Path
 }
 if (-not (Get-Command templ -ErrorAction SilentlyContinue)) {
-  throw "templ not on PATH. Add $env:USERPROFILE\go\bin to PATH."
+  $hint = Join-Path $env:USERPROFILE "go\bin"
+  throw ("templ not on PATH. Add " + $hint + " to PATH.")
 }
 Write-Ok "templ available"
 
 Write-Step "Database reset"
 New-Item -ItemType Directory -Force -Path data | Out-Null
-if ($ResetDb -eq "true") {
-  Get-ChildItem data -Filter "*.db*" -ErrorAction SilentlyContinue | Remove-Item -Force
+if ($env:RESET_DB -eq "true") {
+  Get-ChildItem -Path data -Filter "*.db*" -ErrorAction SilentlyContinue | Remove-Item -Force
   Write-Ok "Cleared data/*.db*"
 } else {
-  Write-Ok "Skipped reset (RESET_DB=$ResetDb)"
+  Write-Ok ("Skipped reset (RESET_DB=" + $env:RESET_DB + ")")
 }
 
 Write-Step "Modules + Templ"
@@ -55,25 +72,23 @@ go mod tidy
 templ generate
 Write-Ok "Ready"
 
-Write-Host @"
-
-============================================================
-  Transaction Ledger API
-  UI:   http://$($env:APP_HOST):$($env:APP_PORT)/
-  API:  http://$($env:APP_HOST):$($env:APP_PORT)/api
-  Docs: docs/API.md  |  docs/ASSUMPTIONS.md
-  SEED_DEMO=$($env:SEED_DEMO)
-============================================================
-  Demo accounts:
-    demo-account-alice    Alice Sharma     Rs 120
-    demo-account-bob      Bob Kumar        Rs 80
-    demo-account-cara     Cara Patel       Rs 25
-    demo-account-dev      Dev Ops Ledger   Rs 0
-    demo-account-eva      Eva Nair         Rs 200
-    demo-account-finance  Finance Pool     Rs 150
-============================================================
-
-"@
+Write-Host ""
+Write-Host "============================================================"
+Write-Host "  Transaction Ledger API"
+Write-Host ("  UI:   http://" + $env:APP_HOST + ":" + $env:APP_PORT + "/")
+Write-Host ("  API:  http://" + $env:APP_HOST + ":" + $env:APP_PORT + "/api")
+Write-Host "  Docs: API.md  |  ASSUMPTIONS.md"
+Write-Host ("  SEED_DEMO=" + $env:SEED_DEMO)
+Write-Host "============================================================"
+Write-Host "  Demo accounts:"
+Write-Host "    demo-account-alice    Alice Sharma     Rs 120"
+Write-Host "    demo-account-bob      Bob Kumar        Rs 80"
+Write-Host "    demo-account-cara     Cara Patel       Rs 25"
+Write-Host "    demo-account-dev      Dev Ops Ledger   Rs 0"
+Write-Host "    demo-account-eva      Eva Nair         Rs 200"
+Write-Host "    demo-account-finance  Finance Pool     Rs 150"
+Write-Host "============================================================"
+Write-Host ""
 
 Write-Step "Starting server (Ctrl+C to stop)"
 go run ./cmd/server
